@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "name": "UBA Bank",
+    "code": "UBA",
+    "address": "Boulevard de la République",
+    "country": "CM",
+    "created_at": "2026-06-24T00:00:00.000Z",
+    "updated_at": "2026-06-24T00:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "name": "CCABank",
+    "code": "CCA",
+    "address": "Avenue Kennedy",
+    "country": "CM",
+    "created_at": "2026-06-24T00:00:00.000Z",
+    "updated_at": "2026-06-24T00:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "name": "SGC Afriland",
+    "code": "SGC",
+    "address": "Rue du Marché",
+    "country": "CM",
+    "created_at": "2026-06-24T00:00:00.000Z",
+    "updated_at": "2026-06-24T00:00:00.000Z"
+  },
+  {
+    "id": 4,
+    "name": "Fiertbac",
+    "code": "FIE",
+    "address": "Place de l'Indépendance",
+    "country": "CM",
+    "created_at": "2026-06-24T00:00:00.000Z",
+    "updated_at": "2026-06-24T00:00:00.000Z"
+  },
+  {
+    "id": 5,
+    "name": "ExpressUnion",
+    "code": "EXU",
+    "address": "Rue des Banques",
+    "country": "CM",
+    "created_at": "2026-06-24T00:00:00.000Z",
+    "updated_at": "2026-06-24T00:00:00.000Z"
+  }
+]

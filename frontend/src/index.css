@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #fff1f2 0%, #fff7ed 50%, #fef2f2 100%);
+  min-height: 100vh;
+}
+
+@layer components {
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-orange-500;
+  }
+
+  .card {
+    @apply bg-white rounded-2xl shadow-md border border-rose-100 p-6;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-300 hover:shadow-lg hover:border-primary-200 hover:-translate-y-1;
+  }
+
+  .btn-primary {
+    @apply bg-primary-500 text-white px-6 py-2.5 rounded-xl font-semibold 
+           hover:bg-primary-600 active:bg-primary-700 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-primary-400 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-gray-700 px-6 py-2.5 rounded-xl font-semibold 
+           border border-gray-300 hover:bg-gray-50 active:bg-gray-100 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-xl border border-gray-300 
+           focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400
+           placeholder-gray-400 transition-all duration-200;
+  }
+
+  .select-field {
+    @apply w-full px-4 py-2.5 rounded-xl border border-gray-300 
+           focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400
+           bg-white transition-all duration-200;
+  }
+
+  .skeleton {
+    @apply bg-gradient-to-r from-rose-100 via-rose-200 to-rose-100 bg-[length:200%_100%] animate-pulse rounded-xl;
+  }
+
+  .badge {
+    @apply px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .badge-active {
+    @apply badge bg-emerald-100 text-emerald-700;
+  }
+
+  .badge-inactive {
+    @apply badge bg-gray-100 text-gray-600;
+  }
+
+  .badge-suspended {
+    @apply badge bg-red-100 text-red-700;
+  }
+
+  .badge-closed {
+    @apply badge bg-rose-100 text-rose-700;
+  }
+}

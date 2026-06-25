@@ -1,0 +1,15 @@
+[
+  {
+    "id": 1,
+    "account_number": "UBA0979939433",
+    "owner_name": "stella elsa",
+    "owner_email": "stellasankwe@gmail.com",
+    "account_type": "CHECKING",
+    "balance": 999500000,
+    "status": "ACTIVE",
+    "bank_id": 1,
+    "user_id": 3,
+    "created_at": "2026-06-25T12:41:48.858Z",
+    "updated_at": "2026-06-25T12:42:35.215Z"
+  }
+]
