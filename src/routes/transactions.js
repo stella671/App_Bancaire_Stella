@@ -8,7 +8,7 @@ const router = Router();
  * /api/v1/transactions/deposit:
  *   post:
  *     tags: [Transactions]
- *     summary: Effectuer un dépôt
+ *     summary: Effectuer un dépôt (admin seulement)
  *     requestBody:
  *       required: true
  *       content:
@@ -19,7 +19,8 @@ const router = Router();
  *               accountId: { type: integer }
  *               amount: { type: number }
  *               description: { type: string }
- *             required: [accountId, amount]
+ *               bankId: { type: integer }
+ *             required: [accountId, amount, bankId]
  *     responses:
  *       201: { description: Dépôt effectué }
  *       404: { description: Compte introuvable }

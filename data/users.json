@@ -2,7 +2,7 @@
   {
     "id": 1,
     "username": "stella@superadmin.com",
-    "password": "stel&é\"",
+    "password": "admin123",
     "role": "admin",
     "created_at": "2024-01-01T00:00:00.000Z",
     "updated_at": "2026-06-25T12:21:32.239Z"
@@ -14,5 +14,21 @@
     "role": "user",
     "created_at": "2026-06-25T12:41:21.776Z",
     "updated_at": "2026-06-25T12:41:21.776Z"
+  },
+  {
+    "id": 4,
+    "username": "coucou",
+    "password": "&é\"'",
+    "role": "user",
+    "created_at": "2026-07-04T18:35:02.189Z",
+    "updated_at": "2026-07-04T18:35:02.189Z"
+  },
+  {
+    "id": 5,
+    "username": "testuser",
+    "password": "test1234",
+    "role": "user",
+    "created_at": "2026-07-04T18:51:44.082Z",
+    "updated_at": "2026-07-04T18:51:44.082Z"
   }
 ]

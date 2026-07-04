@@ -29,10 +29,14 @@ describe('transactionService', () => {
 
   describe('deposit', () => {
     it('effectue un dépôt avec succès', async () => {
-      mockFindById.mockReturnValue(activeAccount);
+      mockFindById.mockImplementation((table, id) => {
+        if (table === 'banks') return { id: 1, name: 'Test Bank' };
+        if (id === 1) return activeAccount;
+        return null;
+      });
       mockInsert.mockReturnValue({ id: 1, amount: 200, type: 'DEPOSIT' });
 
-      const result = await transactionService.deposit({ accountId: 1, amount: 200, description: 'Dépôt test' });
+      const result = await transactionService.deposit({ accountId: 1, amount: 200, bankId: 1, description: 'Dépôt test' }, { role: 'admin' });
 
       expect(mockUpdate).toHaveBeenCalledWith('accounts', 1, { balance: 1200 });
       expect(mockInsert).toHaveBeenCalled();
@@ -40,13 +44,20 @@ describe('transactionService', () => {
     });
 
     it('rejette si le compte est introuvable', async () => {
-      mockFindById.mockReturnValue(null);
-      await expect(transactionService.deposit({ accountId: 999, amount: 100 })).rejects.toThrow('introuvable');
+      mockFindById.mockImplementation((table, id) => {
+        if (table === 'banks') return { id: 1, name: 'Test Bank' };
+        return null;
+      });
+      await expect(transactionService.deposit({ accountId: 999, amount: 100, bankId: 1 }, { role: 'admin' })).rejects.toThrow('introuvable');
     });
 
     it('rejette si le compte est inactif', async () => {
-      mockFindById.mockReturnValue(inactiveAccount);
-      await expect(transactionService.deposit({ accountId: 2, amount: 100 })).rejects.toThrow('inactive');
+      mockFindById.mockImplementation((table, id) => {
+        if (table === 'banks') return { id: 1, name: 'Test Bank' };
+        if (id === 2) return inactiveAccount;
+        return null;
+      });
+      await expect(transactionService.deposit({ accountId: 2, amount: 100, bankId: 1 }, { role: 'admin' })).rejects.toThrow('inactive');
     });
   });
 
@@ -108,12 +119,25 @@ describe('transactionService', () => {
   });
 
   describe('getAll', () => {
-    it('retourne toutes les transactions', async () => {
+    it('retourne toutes les transactions pour admin', async () => {
       const transactions = [{ id: 1, amount: 100, type: 'DEPOSIT' }];
       mockFindAll.mockReturnValue(transactions);
-      const result = await transactionService.getAll();
+      const result = await transactionService.getAll({ role: 'admin' });
       expect(result).toHaveLength(1);
       expect(mockFindAll).toHaveBeenCalledWith('transactions');
+    });
+
+    it('retourne les transactions liées à l\'utilisateur', async () => {
+      mockFindAll.mockReturnValue([
+        { id: 1, source_account_id: 1, destination_account_id: null },
+        { id: 2, source_account_id: null, destination_account_id: 2 },
+        { id: 3, source_account_id: 5, destination_account_id: null },
+      ]);
+      const mockFindBy = vi.fn().mockReturnValue([{ id: 1 }, { id: 2 }]);
+      const db = await import('../../../src/db.js');
+      db.findBy = mockFindBy;
+      const result = await transactionService.getAll({ id: 1, role: 'user' });
+      expect(result).toHaveLength(2);
     });
   });
 

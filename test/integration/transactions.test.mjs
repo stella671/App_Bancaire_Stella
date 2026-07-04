@@ -30,17 +30,23 @@ describe('Transactions API - Intégration', () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
   it('POST /api/v1/transactions/deposit - dépôt (201)', async () => {
-    mockFindById.mockReturnValue({ id: 1, balance: 500, status: 'ACTIVE' });
+    mockFindById.mockImplementation((table, id) => {
+      if (table === 'banks') return { id: 1, name: 'Test Bank' };
+      return { id: 1, balance: 500, status: 'ACTIVE' };
+    });
     mockInsert.mockReturnValue({ id: 1, amount: 200, type: 'DEPOSIT' });
 
-    const res = await request(app).post('/api/v1/transactions/deposit').send({ accountId: 1, amount: 200 });
+    const res = await request(app).post('/api/v1/transactions/deposit').send({ accountId: 1, amount: 200, bankId: 1 });
     expect(res.status).toBe(201);
     expect(res.body.type).toBe('DEPOSIT');
   });
 
   it('POST /api/v1/transactions/deposit - 404 si compte introuvable', async () => {
-    mockFindById.mockReturnValue(null);
-    const res = await request(app).post('/api/v1/transactions/deposit').send({ accountId: 999, amount: 100 });
+    mockFindById.mockImplementation((table, id) => {
+      if (table === 'banks') return { id: 1, name: 'Test Bank' };
+      return null;
+    });
+    const res = await request(app).post('/api/v1/transactions/deposit').send({ accountId: 999, amount: 100, bankId: 1 });
     expect(res.status).toBe(404);
   });
 

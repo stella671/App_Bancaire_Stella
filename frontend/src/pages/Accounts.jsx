@@ -14,8 +14,10 @@ import {
   Trash2,
   Building2,
   Pencil,
+  Search,
 } from 'lucide-react';
 import { accountApi, bankApi } from '../api/client';
+import { useAuth } from '../context/AuthContext';
 
 const FALLBACK_BANKS = [
   { id: 1, name: 'UBA Bank' },
@@ -85,8 +87,11 @@ const accountTypeConfig = {
 };
 
 function Accounts() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin';
   const [accounts, setAccounts] = useState([]);
   const [banks, setBanks] = useState([]);
+  const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -193,6 +198,19 @@ function Accounts() {
         </button>
       </div>
 
+      {isAdmin && (
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Rechercher par nom, email ou numéro de compte..."
+            className="input-field pl-12"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+      )}
+
       {showForm && (
         <div className="card border-primary-200 bg-gradient-to-br from-white to-rose-50/50">
           <div className="flex items-center justify-between mb-6">
@@ -294,7 +312,17 @@ function Accounts() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {accounts.map((account) => {
+          {accounts
+            .filter((a) => {
+              if (!search) return true;
+              const q = search.toLowerCase();
+              return (
+                a.owner_name?.toLowerCase().includes(q) ||
+                a.owner_email?.toLowerCase().includes(q) ||
+                a.account_number?.toLowerCase().includes(q)
+              );
+            })
+            .map((account) => {
             const config = accountTypeConfig[account.account_type] || accountTypeConfig.CHECKING;
             const TypeIcon = config.icon;
             return (

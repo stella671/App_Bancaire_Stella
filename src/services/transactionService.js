@@ -24,8 +24,17 @@ function validateActive(account) {
   }
 }
 
-export async function deposit(data) {
-  const { accountId, amount, description } = data;
+export async function deposit(data, user) {
+  const { accountId, amount, description, bankId } = data;
+  if (!bankId) {
+    throw new AppError('La banque source est requise pour un dépôt', 400);
+  }
+
+  const bank = db.findById('banks', bankId);
+  if (!bank) {
+    throw new AppError(`Banque ${bankId} introuvable`, 404);
+  }
+
   const account = findAccount(accountId);
   validateActive(account);
 
@@ -36,9 +45,10 @@ export async function deposit(data) {
     amount: Number.parseFloat(amount),
     fee: 0,
     type: 'DEPOSIT',
-    description: description || null,
+    description: description || `Dépôt à ${bank.name}`,
     source_account_id: null,
     destination_account_id: accountId,
+    bank_id: Number(bankId),
   });
 }
 
@@ -65,7 +75,9 @@ export async function withdraw(data) {
 }
 
 export async function transfer(data) {
-  const { sourceAccountId, destinationAccountId, amount, description } = data;
+  const sourceAccountId = data.sourceAccountId || data.fromAccountId;
+  const destinationAccountId = data.destinationAccountId || data.toAccountId;
+  const { amount, description } = data;
   const source = findAccount(sourceAccountId);
   const destination = findAccount(destinationAccountId);
 
@@ -92,8 +104,18 @@ export async function transfer(data) {
   });
 }
 
-export async function getAll() {
-  return db.findAll('transactions');
+export async function getAll(user) {
+  const all = db.findAll('transactions');
+  if (user.role === 'admin') return all;
+
+  const userAccounts = db.findBy('accounts', 'user_id', user.id);
+  const userAccountIds = userAccounts.map((a) => a.id);
+
+  return all.filter(
+    (t) =>
+      userAccountIds.includes(t.source_account_id) ||
+      userAccountIds.includes(t.destination_account_id)
+  );
 }
 
 export async function getArchived() {

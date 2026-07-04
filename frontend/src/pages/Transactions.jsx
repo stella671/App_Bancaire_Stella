@@ -12,7 +12,7 @@ import {
   XCircle,
   X,
 } from 'lucide-react';
-import { transactionApi, accountApi } from '../api/client';
+import { transactionApi, accountApi, bankApi } from '../api/client';
 
 function formatCurrency(amount) {
   return new Intl.NumberFormat('fr-FR', {
@@ -32,7 +32,7 @@ function formatDate(dateStr) {
   });
 }
 
-const tabs = [
+const allTabs = [
   { id: 'deposit', label: 'Dépôt', icon: ArrowDownRight },
   { id: 'withdraw', label: 'Retrait', icon: ArrowUpRight },
   { id: 'transfer', label: 'Virement', icon: ArrowLeftRight },
@@ -77,28 +77,33 @@ function EmptyState() {
 }
 
 function Transactions() {
-  const [activeTab, setActiveTab] = useState('deposit');
+  const tabs = allTabs;
+  const [activeTab, setActiveTab] = useState(tabs[0]?.id || 'deposit');
   const [accounts, setAccounts] = useState([]);
+  const [banks, setBanks] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [notification, setNotification] = useState(null);
 
-  const [depositForm, setDepositForm] = useState({ accountId: '', amount: '', description: '' });
+  const [depositForm, setDepositForm] = useState({ accountId: '', amount: '', description: '', bankId: '' });
   const [withdrawForm, setWithdrawForm] = useState({ accountId: '', amount: '', description: '' });
   const [transferForm, setTransferForm] = useState({ fromAccountId: '', toAccountId: '', amount: '', description: '' });
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [accountsRes, transactionsRes] = await Promise.all([
+        const [accountsRes, transactionsRes, banksRes] = await Promise.all([
           accountApi.getAll(),
           transactionApi.getAll(),
+          bankApi.getAll(),
         ]);
         const accs = accountsRes.data;
+        const banksData = banksRes.data;
         setAccounts(accs);
+        setBanks(banksData);
         setTransactions(transactionsRes.data);
-        setDepositForm((prev) => prev.accountId ? prev : { ...prev, accountId: String(accs[0]?.id || '') });
+        setDepositForm((prev) => prev.accountId ? prev : { ...prev, accountId: String(accs[0]?.id || ''), bankId: String(banksData[0]?.id || '') });
         setWithdrawForm((prev) => prev.accountId ? prev : { ...prev, accountId: String(accs[0]?.id || '') });
         setTransferForm((prev) => prev.fromAccountId ? prev : { ...prev, fromAccountId: String(accs[0]?.id || ''), toAccountId: String(accs[1]?.id || accs[0]?.id || '') });
       } catch (err) {
@@ -116,14 +121,14 @@ function Transactions() {
   }
 
   function resetForms() {
-    setDepositForm({ accountId: '', amount: '', description: '' });
+    setDepositForm({ accountId: '', amount: '', description: '', bankId: '' });
     setWithdrawForm({ accountId: '', amount: '', description: '' });
     setTransferForm({ fromAccountId: '', toAccountId: '', amount: '', description: '' });
   }
 
   async function handleDeposit(e) {
     e.preventDefault();
-    if (!depositForm.accountId || !depositForm.amount) return;
+    if (!depositForm.accountId || !depositForm.amount || !depositForm.bankId) return;
     setSubmitting(true);
     try {
       const amount = parseFloat(depositForm.amount);
@@ -131,6 +136,7 @@ function Transactions() {
         accountId: depositForm.accountId,
         amount,
         description: depositForm.description || 'Dépôt',
+        bankId: depositForm.bankId,
       });
       setTransactions((prev) => [res.data, ...prev]);
       setAccounts((prev) => prev.map((a) =>
@@ -139,7 +145,7 @@ function Transactions() {
           : a
       ));
       showNotification('success', 'Dépôt effectué avec succès');
-      setDepositForm({ accountId: String(accounts[0]?.id || ''), amount: '', description: '' });
+      setDepositForm({ accountId: String(accounts[0]?.id || ''), amount: '', description: '', bankId: String(banks[0]?.id || '') });
     } catch (err) {
       showNotification('error', err.response?.data?.message || 'Erreur lors du dépôt');
     } finally {
@@ -282,6 +288,28 @@ function Transactions() {
                   <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 </div>
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Banque source</label>
+                <div className="relative">
+                  <Landmark className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                  <select
+                    className="select-field pl-10 appearance-none"
+                    value={depositForm.bankId}
+                    onChange={(e) => setDepositForm({ ...depositForm, bankId: e.target.value })}
+                    required
+                  >
+                    {banks.length === 0 && <option value="">S&eacute;lectionner une banque</option>}
+                    {banks.map((bank) => (
+                      <option key={bank.id} value={bank.id}>
+                        {bank.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                </div>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Montant (FCFA)</label>
                 <input

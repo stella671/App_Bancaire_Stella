@@ -2,7 +2,7 @@ import * as transactionService from '../services/transactionService.js';
 
 export async function deposit(req, res, next) {
   try {
-    const result = await transactionService.deposit(req.body);
+    const result = await transactionService.deposit(req.body, req.user);
     res.status(201).json(result);
   } catch (err) {
     next(err);
@@ -29,7 +29,7 @@ export async function transfer(req, res, next) {
 
 export async function getAll(req, res, next) {
   try {
-    const transactions = await transactionService.getAll();
+    const transactions = await transactionService.getAll(req.user);
     res.json(transactions);
   } catch (err) {
     next(err);
