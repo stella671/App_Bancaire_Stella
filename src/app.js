@@ -17,8 +17,9 @@ const app = express();
 
 app.disable('x-powered-by');
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN || '*',
+  origin: process.env.CORS_ORIGIN || ['http://localhost:5174', 'http://localhost:8081'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  credentials: true,
 };
 app.use(cors(corsOptions));
 app.use(express.json());
