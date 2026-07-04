@@ -3,7 +3,7 @@ services:
     name: banking-app-backend
     env: node
     region: frankfurt
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && cd frontend && npm install && cd .. && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_VERSION
