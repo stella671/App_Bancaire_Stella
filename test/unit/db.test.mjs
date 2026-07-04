@@ -24,22 +24,22 @@ function clearDataFiles() {
 }
 
 describe('db (in-memory operations)', () => {
-  beforeEach(() => {
-    db.reset();
+  beforeEach(async () => {
+    await db.reset();
   });
 
   afterAll(() => {
     restoreDataFiles();
   });
 
-  it('findAll retourne un tableau vide après reset', () => {
-    expect(db.findAll('banks')).toEqual([]);
-    expect(db.findAll('accounts')).toEqual([]);
-    expect(db.findAll('transactions')).toEqual([]);
+  it('findAll retourne un tableau vide après reset', async () => {
+    expect(await db.findAll('banks')).toEqual([]);
+    expect(await db.findAll('accounts')).toEqual([]);
+    expect(await db.findAll('transactions')).toEqual([]);
   });
 
-  it('insert ajoute un enregistrement avec id et dates', () => {
-    const record = db.insert('banks', { name: 'Test', code: 'TST' });
+  it('insert ajoute un enregistrement avec id et dates', async () => {
+    const record = await db.insert('banks', { name: 'Test', code: 'TST' });
     expect(record.id).toBe(1);
     expect(record.name).toBe('Test');
     expect(record.code).toBe('TST');
@@ -47,77 +47,77 @@ describe('db (in-memory operations)', () => {
     expect(record.updated_at).toBeDefined();
   });
 
-  it('insert incrémente les ids', () => {
-    db.insert('banks', { name: 'A', code: 'A' });
-    db.insert('banks', { name: 'B', code: 'B' });
-    expect(db.findAll('banks')).toHaveLength(2);
-    expect(db.findAll('banks')[1].id).toBe(2);
+  it('insert incrémente les ids', async () => {
+    await db.insert('banks', { name: 'A', code: 'A' });
+    await db.insert('banks', { name: 'B', code: 'B' });
+    expect(await db.findAll('banks')).toHaveLength(2);
+    expect((await db.findAll('banks'))[1].id).toBe(2);
   });
 
-  it('findById retourne un enregistrement par id', () => {
-    const inserted = db.insert('banks', { name: 'Test', code: 'TST' });
-    expect(db.findById('banks', inserted.id)).toEqual(inserted);
+  it('findById retourne un enregistrement par id', async () => {
+    const inserted = await db.insert('banks', { name: 'Test', code: 'TST' });
+    expect(await db.findById('banks', inserted.id)).toEqual(inserted);
   });
 
-  it('findById retourne null si introuvable', () => {
-    expect(db.findById('banks', 999)).toBeNull();
+  it('findById retourne null si introuvable', async () => {
+    expect(await db.findById('banks', 999)).toBeNull();
   });
 
-  it('findById accepte un id string', () => {
-    const inserted = db.insert('banks', { name: 'Test', code: 'TST' });
-    expect(db.findById('banks', String(inserted.id))).toEqual(inserted);
+  it('findById accepte un id string', async () => {
+    const inserted = await db.insert('banks', { name: 'Test', code: 'TST' });
+    expect(await db.findById('banks', String(inserted.id))).toEqual(inserted);
   });
 
-  it('findBy filtre par champ', () => {
-    db.insert('banks', { name: 'Alpha', code: 'A' });
-    db.insert('banks', { name: 'Beta', code: 'B' });
-    const results = db.findBy('banks', 'code', 'A');
+  it('findBy filtre par champ', async () => {
+    await db.insert('banks', { name: 'Alpha', code: 'A' });
+    await db.insert('banks', { name: 'Beta', code: 'B' });
+    const results = await db.findBy('banks', 'code', 'A');
     expect(results).toHaveLength(1);
     expect(results[0].name).toBe('Alpha');
   });
 
-  it('update modifie un enregistrement', () => {
-    const inserted = db.insert('banks', { name: 'Old', code: 'OLD' });
-    const updated = db.update('banks', inserted.id, { name: 'New' });
+  it('update modifie un enregistrement', async () => {
+    const inserted = await db.insert('banks', { name: 'Old', code: 'OLD' });
+    const updated = await db.update('banks', inserted.id, { name: 'New' });
     expect(updated.name).toBe('New');
     expect(updated.code).toBe('OLD');
-    expect(db.findById('banks', inserted.id).name).toBe('New');
+    expect((await db.findById('banks', inserted.id)).name).toBe('New');
   });
 
-  it('update retourne null si introuvable', () => {
-    expect(db.update('banks', 999, {})).toBeNull();
+  it('update retourne null si introuvable', async () => {
+    expect(await db.update('banks', 999, {})).toBeNull();
   });
 
-  it('remove supprime un enregistrement', () => {
-    const inserted = db.insert('banks', { name: 'Test', code: 'TST' });
-    expect(db.remove('banks', inserted.id)).toBe(true);
-    expect(db.findById('banks', inserted.id)).toBeNull();
+  it('remove supprime un enregistrement', async () => {
+    const inserted = await db.insert('banks', { name: 'Test', code: 'TST' });
+    expect(await db.remove('banks', inserted.id)).toBe(true);
+    expect(await db.findById('banks', inserted.id)).toBeNull();
   });
 
-  it('remove retourne false si introuvable', () => {
-    expect(db.remove('banks', 999)).toBe(false);
+  it('remove retourne false si introuvable', async () => {
+    expect(await db.remove('banks', 999)).toBe(false);
   });
 
-  it('getTableConfig retourne la config d\'une table', () => {
-    const config = db.getTableConfig('banks');
+  it('getTableConfig retourne la config d\'une table', async () => {
+    const config = await db.getTableConfig('banks');
     expect(config).toBeDefined();
     expect(config.data).toEqual([]);
   });
 
-  it('getNextId retourne le prochain id', () => {
-    expect(db.getNextId('banks')).toBe(1);
-    db.insert('banks', { name: 'Test', code: 'TST' });
-    expect(db.getNextId('banks')).toBe(2);
+  it('getNextId retourne le prochain id', async () => {
+    expect(await db.getNextId('banks')).toBe(1);
+    await db.insert('banks', { name: 'Test', code: 'TST' });
+    expect(await db.getNextId('banks')).toBe(2);
   });
 
-  it('reset vide toutes les tables', () => {
-    db.insert('banks', { name: 'Test', code: 'TST' });
-    db.insert('accounts', { owner_name: 'John' });
-    db.reset();
-    expect(db.findAll('banks')).toHaveLength(0);
-    expect(db.findAll('accounts')).toHaveLength(0);
-    expect(db.findAll('transactions')).toHaveLength(0);
-    expect(db.getNextId('banks')).toBe(1);
+  it('reset vide toutes les tables', async () => {
+    await db.insert('banks', { name: 'Test', code: 'TST' });
+    await db.insert('accounts', { owner_name: 'John' });
+    await db.reset();
+    expect(await db.findAll('banks')).toHaveLength(0);
+    expect(await db.findAll('accounts')).toHaveLength(0);
+    expect(await db.findAll('transactions')).toHaveLength(0);
+    expect(await db.getNextId('banks')).toBe(1);
   });
 });
 
@@ -135,12 +135,12 @@ describe('db (disk load)', () => {
 
     vi.resetModules();
     const freshDb = await import('../../src/db.js');
-    const banks = freshDb.findAll('banks');
+    const banks = await freshDb.findAll('banks');
     expect(banks).toHaveLength(1);
     expect(banks[0].id).toBe(42);
     expect(banks[0].name).toBe('Disk Bank');
 
-    const nextId = freshDb.getNextId('banks');
+    const nextId = await freshDb.getNextId('banks');
     expect(nextId).toBe(43);
   });
 
@@ -150,7 +150,7 @@ describe('db (disk load)', () => {
 
     vi.resetModules();
     const freshDb = await import('../../src/db.js');
-    expect(freshDb.findAll('banks')).toEqual([]);
+    expect(await freshDb.findAll('banks')).toEqual([]);
   });
 
   it('gère les fichiers manquants en retournant un tableau vide', async () => {
@@ -159,6 +159,6 @@ describe('db (disk load)', () => {
 
     vi.resetModules();
     const freshDb = await import('../../src/db.js');
-    expect(freshDb.findAll('banks')).toEqual([]);
+    expect(await freshDb.findAll('banks')).toEqual([]);
   });
 });

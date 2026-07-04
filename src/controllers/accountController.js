@@ -75,7 +75,7 @@ export async function update(req, res, next) {
     if (!account) {
       return res.status(404).json({ error: 'Not Found', message: `Compte ${req.params.id} introuvable` });
     }
-    const bank = db.findById('banks', account.bank_id);
+    const bank = await db.findById('banks', account.bank_id);
     res.json({ ...account, bank_name: bank ? bank.name : null });
   } catch (err) {
     next(err);

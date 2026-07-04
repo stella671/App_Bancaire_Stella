@@ -8,11 +8,11 @@ function generateAccountNumber(bankCode) {
 export async function create(data, userId) {
   const { ownerName, ownerEmail, accountType, bankId } = data;
 
-  const bank = db.findById('banks', bankId);
+  const bank = await db.findById('banks', bankId);
   if (!bank) return null;
 
   const accountNumber = generateAccountNumber(bank.code);
-  return db.insert('accounts', {
+  return await db.insert('accounts', {
     account_number: accountNumber,
     owner_name: ownerName,
     owner_email: ownerEmail,
@@ -27,11 +27,11 @@ export async function create(data, userId) {
 export async function getAll(user) {
   let accounts;
   if (user.role === 'admin') {
-    accounts = db.findAll('accounts');
+    accounts = await db.findAll('accounts');
   } else {
-    accounts = db.findBy('accounts', 'user_id', user.id);
+    accounts = await db.findBy('accounts', 'user_id', user.id);
   }
-  const banks = db.findAll('banks');
+  const banks = await db.findAll('banks');
   return accounts.map((a) => {
     const bank = banks.find((b) => b.id === Number(a.bank_id));
     return { ...a, bank_name: bank ? bank.name : null };
@@ -39,22 +39,22 @@ export async function getAll(user) {
 }
 
 export async function getById(id, user) {
-  const account = db.findById('accounts', id);
+  const account = await db.findById('accounts', id);
   if (!account) return null;
   if (user.role !== 'admin' && Number(account.user_id) !== user.id) return null;
-  const bank = db.findById('banks', account.bank_id);
+  const bank = await db.findById('banks', account.bank_id);
   return { ...account, bank_name: bank ? bank.name : null };
 }
 
 export async function getByBank(bankId, user) {
-  const bank = db.findById('banks', bankId);
+  const bank = await db.findById('banks', bankId);
   if (!bank) return null;
 
   let accounts;
   if (user.role === 'admin') {
-    accounts = db.findBy('accounts', 'bank_id', bankId);
+    accounts = await db.findBy('accounts', 'bank_id', bankId);
   } else {
-    accounts = db.findBy('accounts', 'bank_id', bankId).filter((a) => Number(a.user_id) === user.id);
+    accounts = (await db.findBy('accounts', 'bank_id', bankId)).filter((a) => Number(a.user_id) === user.id);
   }
   return accounts.map((a) => ({ ...a, bank_name: bank.name }));
 }
@@ -86,7 +86,7 @@ function archiveRelatedTransactions(accountId) {
 }
 
 export async function remove(id) {
-  const account = db.findById('accounts', id);
+  const account = await db.findById('accounts', id);
   if (!account) return false;
 
   if (Number(account.balance) !== 0) {
@@ -97,11 +97,11 @@ export async function remove(id) {
   }
 
   archiveRelatedTransactions(id);
-  return db.remove('accounts', id);
+  return await db.remove('accounts', id);
 }
 
 export async function update(id, data, user) {
-  const account = db.findById('accounts', id);
+  const account = await db.findById('accounts', id);
   if (!account) return null;
 
   if (user.role !== 'admin' && Number(account.user_id) !== user.id) {
@@ -114,9 +114,9 @@ export async function update(id, data, user) {
   if (data.account_type !== undefined) allowed.account_type = data.account_type;
   if (data.status !== undefined && user.role === 'admin') allowed.status = data.status;
 
-  return db.update('accounts', id, allowed);
+  return await db.update('accounts', id, allowed);
 }
 
 export async function exists(id) {
-  return db.findById('accounts', id) !== null;
+  return await db.findById('accounts', id) !== null;
 }

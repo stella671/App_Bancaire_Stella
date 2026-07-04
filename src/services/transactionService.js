@@ -30,7 +30,7 @@ export async function deposit(data, user) {
     throw new AppError('La banque source est requise pour un dépôt', 400);
   }
 
-  const bank = db.findById('banks', bankId);
+  const bank = await db.findById('banks', bankId);
   if (!bank) {
     throw new AppError(`Banque ${bankId} introuvable`, 404);
   }
@@ -39,9 +39,9 @@ export async function deposit(data, user) {
   validateActive(account);
 
   const newBalance = Number.parseFloat(account.balance) + Number.parseFloat(amount);
-  db.update('accounts', accountId, { balance: newBalance });
+  await db.update('accounts', accountId, { balance: newBalance });
 
-  return db.insert('transactions', {
+  return await db.insert('transactions', {
     amount: Number.parseFloat(amount),
     fee: 0,
     type: 'DEPOSIT',
@@ -62,9 +62,9 @@ export async function withdraw(data) {
   }
 
   const newBalance = Number.parseFloat(account.balance) - Number.parseFloat(amount);
-  db.update('accounts', accountId, { balance: newBalance });
+  await db.update('accounts', accountId, { balance: newBalance });
 
-  return db.insert('transactions', {
+  return await db.insert('transactions', {
     amount: Number.parseFloat(amount),
     fee: 0,
     type: 'WITHDRAWAL',
@@ -91,10 +91,10 @@ export async function transfer(data) {
   const newSourceBalance = Number.parseFloat(source.balance) - Number.parseFloat(amount);
   const newDestBalance = Number.parseFloat(destination.balance) + Number.parseFloat(amount);
 
-  db.update('accounts', sourceAccountId, { balance: newSourceBalance });
-  db.update('accounts', destinationAccountId, { balance: newDestBalance });
+  await db.update('accounts', sourceAccountId, { balance: newSourceBalance });
+  await db.update('accounts', destinationAccountId, { balance: newDestBalance });
 
-  return db.insert('transactions', {
+  return await db.insert('transactions', {
     amount: Number.parseFloat(amount),
     fee: 0,
     type: 'TRANSFER',
@@ -105,10 +105,10 @@ export async function transfer(data) {
 }
 
 export async function getAll(user) {
-  const all = db.findAll('transactions');
+  const all = await db.findAll('transactions');
   if (user.role === 'admin') return all;
 
-  const userAccounts = db.findBy('accounts', 'user_id', user.id);
+  const userAccounts = await db.findBy('accounts', 'user_id', user.id);
   const userAccountIds = userAccounts.map((a) => a.id);
 
   return all.filter(
@@ -119,11 +119,11 @@ export async function getAll(user) {
 }
 
 export async function getArchived() {
-  return db.findAll('archived_transactions');
+  return await db.findAll('archived_transactions');
 }
 
 export async function getHistory(accountId, user) {
-  const account = db.findById('accounts', accountId);
+  const account = await db.findById('accounts', accountId);
   if (!account) {
     throw new AppError(`Compte ${accountId} introuvable`, 404);
   }
@@ -131,7 +131,7 @@ export async function getHistory(accountId, user) {
     throw new AppError(`Compte ${accountId} introuvable`, 404);
   }
 
-  const all = db.findAll('transactions');
+  const all = await db.findAll('transactions');
   return all
     .filter((t) => t.source_account_id === accountId || t.destination_account_id === accountId)
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
